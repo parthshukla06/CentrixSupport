@@ -1,0 +1,14 @@
+{
+    "days_checked_in": 1,
+    "improvements": [],
+    "setbacks": [
+        "feeling down"
+    ],
+    "last_check_in": "2025-05-19T21:22:49.974095",
+    "mood_history": [
+        {
+            "date": "2025-05-19T21:22:49.974095",
+            "mood": "bad"
+        }
+    ]
+}

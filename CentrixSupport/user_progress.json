@@ -1,0 +1,22 @@
+{
+    "days_checked_in": 3,
+    "improvements": [
+        "feeling good"
+    ],
+    "setbacks": [],
+    "last_check_in": "2025-07-14T20:34:12.722371",
+    "mood_history": [
+        {
+            "date": "2025-05-22T19:11:48.710899",
+            "mood": "okay"
+        },
+        {
+            "date": "2025-05-24T20:30:04.921129",
+            "mood": "good"
+        },
+        {
+            "date": "2025-07-14T20:34:12.719629",
+            "mood": "okay"
+        }
+    ]
+}

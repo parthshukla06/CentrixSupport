@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resources - CentrixSupport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-teal-50 text-gray-800 font-sans min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-teal-700 text-white py-4 px-6 shadow-md flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <img src="{{ url_for('static', filename='img/streamly.png') }}" alt="Centrix Logo" class="h-8 w-8 rounded-full" />
+      <h1 class="text-xl font-bold">CentrixSupport</h1>
+    </div>
+    <a href="{{ url_for('index') }}" class="bg-white text-teal-800 px-4 py-2 rounded-md shadow hover:bg-gray-100 text-sm font-medium transition">⬅ Back to Chat</a>
+  </header>
+
+  <!-- Main Section -->
+  <main class="max-w-4xl mx-auto p-6 md:p-10">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-teal-800 mb-2">📚 Resources</h2>
+      <p class="text-gray-700">Helpful documentation, tools, and external references for deeper learning and support.</p>
+    </div>
+
+    <!-- Resource List -->
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="bg-white rounded-lg p-5 shadow hover:shadow-md transition border-l-4 border-teal-500">
+        <h3 class="font-semibold text-teal-700 mb-2">📄 OpenAI Documentation</h3>
+        <p class="text-sm mb-2">Official docs on models, API, and fine-tuning.</p>
+        <a href="https://console.groq.com/docs/overview" target="_blank" class="text-teal-600 hover:underline text-sm">Visit →</a>
+      </div>
+
+      <div class="bg-white rounded-lg p-5 shadow hover:shadow-md transition border-l-4 border-teal-500">
+        <h3 class="font-semibold text-teal-700 mb-2">🔧 LangChain</h3>
+        <p class="text-sm mb-2">Framework for building applications with LLMs.</p>
+        <a href="https://docs.langchain.com" target="_blank" class="text-teal-600 hover:underline text-sm">Visit →</a>
+      </div>
+
+      <div class="bg-white rounded-lg p-5 shadow hover:shadow-md transition border-l-4 border-teal-500">
+        <h3 class="font-semibold text-teal-700 mb-2">📦 Hugging Face Transformers</h3>
+        <p class="text-sm mb-2">State-of-the-art models and NLP libraries.</p>
+        <a href="https://huggingface.co/docs/transformers/index" target="_blank" class="text-teal-600 hover:underline text-sm">Visit →</a>
+      </div>
+
+      <div class="bg-white rounded-lg p-5 shadow hover:shadow-md transition border-l-4 border-teal-500">
+        <h3 class="font-semibold text-teal-700 mb-2">🧠 Vector Databases</h3>
+        <p class="text-sm mb-2">Intro to vector stores like Pinecone, Chroma, etc.</p>
+        <a href="https://www.pinecone.io/learn/vector-database/" target="_blank" class="text-teal-600 hover:underline text-sm">Visit →</a>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>

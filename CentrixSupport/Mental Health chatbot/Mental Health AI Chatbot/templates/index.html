@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Get Help - CentrixSupport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .text-shadow {
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .typing-loader {
+      width: 30px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .typing-loader span {
+      width: 6px;
+      height: 6px;
+      background-color: #0f766e;
+      border-radius: 50%;
+      animation: typing 1s infinite;
+    }
+    .typing-loader span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-loader span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+  </style>
+</head>
+<body class="bg-teal-100 font-sans min-h-screen overflow-x-hidden relative">
+
+  <!-- Sidebar -->
+  <div id="historySidebar" class="bg-teal-800 text-white w-64 p-4 space-y-2 hidden fixed inset-y-0 left-0 z-30 overflow-y-auto max-h-screen transition-transform">
+    <h2 class="text-xl font-semibold mb-4">Chat History</h2>
+    <div id="historyList" class="space-y-2"></div>
+  </div>
+
+  <!-- Main Layout -->
+  <div id="mainLayout" class="transition-all">
+
+    <!-- Navbar -->
+    <nav class="bg-teal-800 text-white px-4 md:px-8 py-4 flex justify-between items-center fixed w-full z-40 top-0">
+      <div class="flex items-center gap-4">
+        <button id="toggleHistory" class="bg-white text-teal-900 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-teal-500" aria-label="Toggle sidebar">☰</button>
+        <div class="flex items-center gap-2">
+          <img src="{{ url_for('static', filename='img/centic.png') }}" alt="Centrix Logo" class="h-10 w-10 rounded-full shadow-sm" />
+          <div class="text-xl font-bold">CentrixSupport</div>
+        </div>
+      </div>
+      <div class="hidden md:flex flex-wrap items-center gap-4 text-sm font-medium text-white">
+        <a href="{{ url_for('home') }}" class="hover:underline">Home</a>
+        <a href="{{ url_for('about') }}" class="hover:underline">About</a>
+        <a href="{{ url_for('resource') }}" class="hover:underline">Resources</a>
+        <a href="{{ url_for('contact') }}" class="hover:underline">Contact</a>
+        <a href="{{ url_for('help') }}" class="hover:underline">Get Help</a>
+        <button onclick="toggleTodoModal()" class="hover:underline">To Do List</button>
+      </div>
+      <button id="newChat" class="ml-4 bg-white text-teal-900 px-3 py-1 rounded hover:bg-gray-100 text-sm">+ New Chat</button>
+    </nav>
+
+    <!-- Chat Area -->
+    <main id="chatMain" class="px-4 md:px-24 py-6 mt-16 flex-1 overflow-auto transition-all">
+      <h1 class="text-3xl font-bold text-teal-900 text-center mb-4">Talk to Centrix Bot</h1>
+
+      <!-- File Upload -->
+      <form id="uploadForm" class="mb-4 flex flex-col md:flex-row md:items-center gap-4">
+        <input type="file" id="fileInput" class="bg-white px-4 py-2 rounded border border-teal-300" multiple />
+        <button type="submit" class="bg-teal-700 text-white px-4 py-2 rounded hover:bg-teal-600">Upload File</button>
+        <div class="w-full md:w-1/2" id="uploadStatus"></div>
+        <ul id="fileList" class="mt-2 space-y-1 text-sm text-gray-800"></ul> 
+      </form>
+
+      <!-- Chat Box -->
+      <div id="chatBox" class="bg-white rounded-xl shadow-inner p-4 space-y-4 h-96 overflow-y-auto">
+        <div class="text-left">
+          <div class="inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl text-shadow">
+            <p>Hi there! How can I support you today?</p>
+            <span class="block text-xs text-gray-500">[<span class="timestamp"></span>]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <form id="chatForm" class="mt-6 flex gap-4">
+        <input type="text" id="userInput" class="flex-1 px-4 py-2 border-2 border-teal-500 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400" placeholder="Ask me anything..." autocomplete="off" />
+        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition">Send 🚀</button>
+      </form>
+    </main>
+  </div>
+
+  <!-- To-Do Modal -->
+  <div id="todoModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-96 shadow-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-teal-800">📝 To-Do List</h2>
+        <button onclick="toggleTodoModal()" class="text-teal-700 font-bold">✖</button>
+      </div>
+      <input id="taskInput" type="text" placeholder="Enter a task..." class="w-full px-3 py-2 mb-2 border rounded border-teal-300"/>
+      <div class="flex justify-between mb-4">
+        <button onclick="addTask()" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm">Add</button>
+        <button onclick="removeLastTask()" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm">Remove Last</button>
+        <button onclick="clearTasks()" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm">Clear</button>
+      </div>
+      <ul id="taskList" class="list-disc list-inside text-teal-800 space-y-1 max-h-40 overflow-y-auto"></ul>
+    </div>
+  </div>
+
+
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const chatForm = document.getElementById("chatForm");
+    const userInput = document.getElementById("userInput");
+    const uploadForm = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("fileInput");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const fileList = document.getElementById("fileList");
+    const historyList = document.getElementById("historyList");
+    const toggleHistoryBtn = document.getElementById("toggleHistory");
+    const historySidebar = document.getElementById("historySidebar");
+    const chatMain = document.getElementById("chatMain");
+  
+    let stopTyping = false;
+    let uploadedFiles = [];
+    let uploadedFilePaths = [];
+    let fileUsed = false;
+  
+    // Session setup
+    let currentSessionId = localStorage.getItem("currentSessionId") || Date.now().toString();
+    let sessions = JSON.parse(localStorage.getItem("chatSessions") || "{}");
+  
+    function addTimestamp() {
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+  
+    function saveMessage(sessionId, role, text) {
+      if (!sessions[sessionId]) sessions[sessionId] = { messages: [] };
+      sessions[sessionId].messages.push({ role, text, time: addTimestamp() });
+      localStorage.setItem("chatSessions", JSON.stringify(sessions));
+      localStorage.setItem("currentSessionId", sessionId);
+      renderHistory();
+    }
+  
+    function renderHistory() {
+      historyList.innerHTML = "";
+      Object.entries(sessions).forEach(([sessionId, session]) => {
+        const container = document.createElement("div");
+        container.className = "relative group";
+        const firstMessage = session.messages.find(m => m.role === "user");
+        const label = firstMessage ? `${firstMessage.text.slice(0, 20)}...` : "Untitled";
+  
+        const div = document.createElement("div");
+        div.className = "text-sm bg-teal-700 p-2 rounded hover:bg-teal-600 cursor-pointer pr-8";
+        div.textContent = `${label} [${session.messages[0]?.time || "time"}]`;
+        div.onclick = () => loadSession(sessionId);
+  
+        const delBtn = document.createElement("button");
+        delBtn.innerHTML = `<img src="https://img.icons8.com/pulsar-gradient/48/clear-symbol.png" alt="delete" width="20" height="20">`;
+        delBtn.className = "absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100";
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          delete sessions[sessionId];
+          localStorage.setItem("chatSessions", JSON.stringify(sessions));
+          if (currentSessionId === sessionId) {
+            currentSessionId = Object.keys(sessions)[0] || Date.now().toString();
+            localStorage.setItem("currentSessionId", currentSessionId);
+            loadSession(currentSessionId);
+          }
+          renderHistory();
+        };
+  
+        container.appendChild(div);
+        container.appendChild(delBtn);
+        historyList.appendChild(container);
+      });
+    }
+  
+    function loadSession(sessionId) {
+      currentSessionId = sessionId;
+      localStorage.setItem("currentSessionId", sessionId);
+      chatBox.innerHTML = "";
+      const session = sessions[sessionId];
+      if (session?.messages) {
+        session.messages.forEach(msg => addMessage(msg.text, msg.role === "user"));
+      }
+    }
+  
+    document.getElementById("newChat").addEventListener("click", () => {
+      currentSessionId = Date.now().toString();
+      sessions[currentSessionId] = { messages: [] };
+      localStorage.setItem("chatSessions", JSON.stringify(sessions));
+      localStorage.setItem("currentSessionId", currentSessionId);
+      chatBox.innerHTML = "";
+      addMessage("Hi there! How can I support you today?");
+      renderHistory();
+    });
+  
+    toggleHistoryBtn.addEventListener("click", () => {
+      historySidebar.classList.toggle("hidden");
+      chatMain.classList.toggle("with-sidebar");
+    });
+  
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768 && !historySidebar.classList.contains("hidden")) {
+        chatMain.classList.add("with-sidebar");
+      } else {
+        chatMain.classList.remove("with-sidebar");
+      }
+    });
+  
+    function addMessage(text, isUser = false) {
+      const wrapper = document.createElement("div");
+      wrapper.className = isUser ? "text-right" : "text-left";
+      const bubble = document.createElement("div");
+      bubble.className = `inline-block ${isUser ? "bg-teal-600 text-white" : "bg-teal-200 text-teal-900"} px-4 py-2 rounded-xl whitespace-pre-wrap`;
+      bubble.innerHTML = `${text}<span class='block text-xs text-gray-500 mt-1'>[${addTimestamp()}]</span>`;
+      wrapper.appendChild(bubble);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  
+    function renderFileList() {
+      fileList.innerHTML = "";
+      uploadedFiles.forEach((file, index) => {
+        const li = document.createElement("li");
+        li.className = "flex justify-between items-center bg-gray-100 p-2 rounded";
+        li.innerHTML = `<span>${file.name}</span>`;
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "❌";
+        removeBtn.onclick = () => {
+          uploadedFiles.splice(index, 1);
+          renderFileList();
+        };
+        li.appendChild(removeBtn);
+        fileList.appendChild(li);
+      });
+    }
+  
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!fileInput.files.length) return alert("Please select files to upload.");
+  
+      uploadedFiles = Array.from(fileInput.files);
+      uploadedFilePaths = [];
+      fileUsed = false;
+      uploadStatus.innerHTML = "";
+      renderFileList();
+  
+      for (const file of uploadedFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+  
+        const progressBar = document.createElement("div");
+        progressBar.className = "bg-teal-600 h-2.5 rounded-full w-0 mb-1";
+        const container = document.createElement("div");
+        container.className = "w-full bg-gray-200 rounded-full mt-2";
+        container.appendChild(progressBar);
+        uploadStatus.appendChild(container);
+  
+        try {
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload", true);
+            xhr.upload.onprogress = function (e) {
+              if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + "%";
+              }
+            };
+            xhr.onload = function () {
+              if (xhr.status === 200) {
+                const result = JSON.parse(xhr.responseText);
+                if (result.filepaths?.length) {
+                  uploadedFilePaths.push(...result.filepaths);
+                  resolve();
+                } else {
+                  reject(new Error("No file path returned"));
+                }
+              } else {
+                reject(new Error(`Upload failed (Status ${xhr.status})`));
+              }
+            };
+            xhr.onerror = () => reject(new Error("Upload failed (Network error)"));
+            xhr.send(formData);
+          });
+        } catch (err) {
+          alert(`❌ File upload failed: ${err.message}`);
+          uploadStatus.innerHTML = "";
+          uploadedFilePaths = [];
+          return;
+        }
+      }
+  
+      uploadStatus.innerHTML = `
+        <p class="text-sm text-green-700 mt-2">✅ File uploaded successfully.</p>
+        <p class="text-sm text-gray-700">💬 You may now ask <strong>one</strong> question using this file.</p>
+      `;
+    });
+  
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const query = userInput.value.trim();
+      if (!query) return;
+  
+      addMessage(query, true);
+      saveMessage(currentSessionId, "user", query);
+      userInput.value = "";
+  
+      const wrapper = document.createElement("div");
+      wrapper.className = "text-left";
+      const bubble = document.createElement("div");
+      bubble.className = "inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl whitespace-pre-wrap";
+  
+      const loading = document.createElement("div");
+      loading.className = "typing-loader mt-1";
+      loading.innerHTML = "<span></span><span></span><span></span>";
+      bubble.appendChild(loading);
+  
+      wrapper.appendChild(bubble);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+  
+      try {
+        const useFile = !fileUsed && uploadedFilePaths.length > 0;
+        const res = await fetch("/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query,
+            filepaths: useFile ? uploadedFilePaths : [],
+            session_name: currentSessionId
+          }),
+        });
+  
+        if (!res.ok) throw new Error("Failed to get response from server.");
+  
+        const data = await res.json();
+        const cleanResponse = data.response?.trim() || "⚠️ No response received.";
+  
+        bubble.removeChild(loading);
+        const heading = document.createElement("div");
+        heading.className = "font-bold text-teal-700 mb-1";
+        heading.textContent = "Response:";
+        const responseContent = document.createElement("p");
+        responseContent.className = "whitespace-pre-wrap";
+        bubble.appendChild(heading);
+        bubble.appendChild(responseContent);
+  
+        stopTyping = false;
+        let displayText = "";
+        for (const char of cleanResponse) {
+          if (stopTyping) break;
+          displayText += char;
+          responseContent.innerHTML = displayText.replace(/\n/g, "<br>");
+          chatBox.scrollTop = chatBox.scrollHeight;
+          await new Promise(r => setTimeout(r, 1));
+        }
+  
+        bubble.appendChild(document.createElement("br"));
+        const timestamp = document.createElement("span");
+        timestamp.className = "block text-xs text-gray-500 mt-1";
+        timestamp.textContent = `[${addTimestamp()}]`;
+        bubble.appendChild(timestamp);
+  
+        saveMessage(currentSessionId, "bot", cleanResponse);
+  
+        if (useFile) {
+          uploadedFiles = [];
+          uploadedFilePaths = [];
+          fileInput.value = "";
+          fileList.innerHTML = "";
+          uploadStatus.innerHTML = `<p class='text-sm text-yellow-800'>🔁 File was used. Upload again if needed.</p>`;
+          fileUsed = true;
+        }
+  
+      } catch (err) {
+        if (bubble.contains(loading)) bubble.removeChild(loading);
+        bubble.textContent = "❌ Failed to get response from server.";
+      }
+    });
+  
+    // Redirect to disclaimer on first load
+    window.addEventListener("DOMContentLoaded", () => {
+      const seenDisclaimer = localStorage.getItem("seenDisclaimer");
+      if (!seenDisclaimer) {
+        localStorage.setItem("seenDisclaimer", "yes");
+        window.location.href = "/disclaimer";
+      } else {
+        renderHistory();
+        loadSession(currentSessionId);
+      }
+    });
+  </script>
+  
+    
+    
+  
+  
+</body>
+</html>

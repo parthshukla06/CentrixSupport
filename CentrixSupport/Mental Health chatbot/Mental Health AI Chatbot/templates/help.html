@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Get Help - Mental Health AI Chatbot</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #e6f2ff; /* soft light blue background */
+      margin: 0;
+      padding: 0 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .help-container {
+      background: white;
+      max-width: 600px;
+      width: 100%;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 102, 204, 0.2);
+      text-align: center;
+    }
+
+    h1 {
+      color: #004080;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    ul li {
+      background: #f0f8ff;
+      margin-bottom: 15px;
+      padding: 15px 20px;
+      border-left: 5px solid #0073e6;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #004080;
+      cursor: default;
+    }
+
+    ul li a {
+      color: #0073e6;
+      text-decoration: none;
+    }
+
+    ul li a:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      background-color: #0073e6;
+      color: white;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+    }
+
+    button:hover {
+      background-color: #005bb5;
+    }
+  </style>
+</head>
+<body>
+  <div class="help-container">
+    <h1>Get Help Now</h1>
+    <p>If you or someone you know is struggling, remember you are not alone.  
+       Here are some trusted resources to support your mental health:</p>
+    <ul>
+      <li>
+        National Suicide Prevention Lifeline:  
+        <strong>1800-123-4567</strong>  
+        (Available 24/7)
+      </li>
+      <li>
+        <a href="https://www.mentalhealth.gov/get-help/immediate-help" target="_blank" rel="noopener noreferrer">
+          Immediate Help & Crisis Resources
+        </a>
+      </li>
+      <li>
+        <a href="https://www.who.int/health-topics/mental-health" target="_blank" rel="noopener noreferrer">
+          World Health Organization - Mental Health
+        </a>
+      </li>
+      <li>
+        Local Mental Health Clinics and Support Groups - Check your community listings.
+      </li>
+    </ul>
+
+    <button id="backBtn">Back to Contact</button>
+  </div>
+
+  <script>
+    document.getElementById('backBtn').addEventListener('click', () => {
+      // Change the URL below to the actual path of your contact page
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Us - CentrixSupport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-teal-50 font-sans text-gray-800 min-h-screen">
+
+  <!-- Navigation -->
+  <nav class="bg-teal-700 text-white px-6 py-4 flex justify-between items-center shadow-md">
+    <div class="flex items-center gap-2">
+      <img src="{{ url_for('static', filename='img/streamly.png') }}" alt="Centrix Logo" class="h-8 w-8 rounded-full" />
+      <span class="text-xl font-bold">CentrixSupport</span>
+    </div>
+    <div class="space-x-4 text-sm">
+      <a href="{{ url_for('home') }}" class="hover:underline">Home</a>
+      <a href="{{ url_for('disclaimer') }}" class="hover:underline">Disclaimer</a>
+      <a href="{{ url_for('chat') }}" class="hover:underline">Chat</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto p-6 md:p-12">
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-teal-800 mb-3">About CentrixSupport</h1>
+      <p class="text-teal-700 text-lg">Smart File-Based AI Support for Everyone</p>
+    </div>
+
+    <!-- Introduction -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-teal-700 mb-2">What is CentrixSupport?</h2>
+      <p class="text-gray-700 leading-relaxed">
+        CentrixSupport is an intelligent assistant platform designed to help users understand and query documents, files, and text content using cutting-edge AI. Whether you're a student, professional, or researcher — you can upload a file and chat with our AI to extract insights instantly.
+      </p>
+    </section>
+
+    <!-- Features -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold text-teal-700 mb-2">Key Features</h2>
+      <ul class="list-disc list-inside text-gray-700 space-y-1">
+        <li>📄 File-based Q&A support (PDFs, text files, etc.)</li>
+        <li>🤖 Intelligent chat assistant for contextual queries</li>
+        <li>⚡ Fast and responsive UI with chat history</li>
+        <li>🔒 No data stored – your files stay private</li>
+        <li>🎯 Built for simplicity, speed, and privacy</li>
+      </ul>
+    </section>
+
+    <!-- Mission -->
+    <section>
+      <h2 class="text-2xl font-semibold text-teal-700 mb-2">Our Mission</h2>
+      <p class="text-gray-700 leading-relaxed">
+        We believe in making AI accessible to everyone. Our mission is to empower individuals and teams to make sense of their information faster — without complex setups, steep learning curves, or security risks.
+      </p>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 text-sm text-teal-900">
+    &copy; {{ year }} CentrixSupport. All rights reserved.
+  </footer>
+
+</body>
+</html>

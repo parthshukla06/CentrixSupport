@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Disclaimer - CentrixSupport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-teal-100 min-h-screen flex items-center justify-center font-sans">
+
+  <div id="disclaimer-box" class="bg-white rounded-xl shadow-2xl p-8 md:p-12 max-w-2xl w-full mx-4">
+    
+    <!-- Logo + Title -->
+    <div class="flex flex-col items-center mb-6">
+      <img src="{{ url_for('static', filename='img/centic.png') }}" alt="Centrix Logo" class="h-14 w-14 rounded-full shadow-md mb-3">
+      <h1 class="text-3xl font-bold text-teal-800">Disclaimer</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="space-y-4 text-gray-700 text-sm leading-relaxed mb-6">
+      <p>
+        Welcome to <strong>CentrixSupport</strong>. By continuing, you acknowledge that this tool is provided for informational purposes only.
+      </p>
+      <p>
+        We do not guarantee the accuracy, completeness, or reliability of any responses. You use this service at your own risk. Always verify critical information independently.
+      </p>
+      <p>
+        This tool may analyze uploaded files, but no data is stored on our servers. Ensure you do not upload confidential or sensitive documents.
+      </p>
+    </div>
+
+    <!-- Checkbox -->
+    <div class="flex items-start mb-6">
+      <input type="checkbox" id="agree" class="mt-1 mr-3 h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer">
+      <label for="agree" class="text-sm text-gray-700 select-none">
+        I have read and agree to the terms above.
+      </label>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-end space-x-4">
+      <a href="{{ url_for('home') }}" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-sm text-gray-800">Back</a>
+      <button onclick="handleContinue()" class="px-6 py-2 rounded bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm">Continue</button>
+    </div>
+
+  </div>
+
+  <!-- Script -->
+  <script>
+    function handleContinue() {
+      const checkbox = document.getElementById("agree");
+      if (checkbox.checked) {
+        window.location.href = "{{ url_for('index') }}";  // ✅ proceed to chat
+      } else {
+        alert("⚠️ You must agree to the disclaimer to continue.");
+      }
+    }
+  </script>
+
+</body>
+</html>

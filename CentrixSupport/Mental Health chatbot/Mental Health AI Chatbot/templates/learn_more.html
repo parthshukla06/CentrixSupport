@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learn More - CentrixSupport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-white to-teal-100 min-h-screen font-sans text-teal-900">
+
+  <!-- Header -->
+  <header class="bg-teal-800 text-white py-4 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <img src="{{ url_for('static', filename='img/centic.png') }}" alt="CentrixSupport Logo" class="h-10 w-10 rounded-full shadow">
+        <h1 class="text-xl font-semibold">CentrixSupport</h1>
+      </div>
+      <a href="{{ url_for('home') }}" class="text-sm hover:underline">← Back to Home</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto px-4 py-12 space-y-12">
+
+    <section class="text-center">
+      <h2 class="text-3xl font-bold mb-4">How CentrixSupport Helps You</h2>
+      <p class="text-teal-800 max-w-3xl mx-auto">
+        CentrixSupport is your intelligent mental wellness assistant and smart document Q&A bot. Whether you're exploring insights from uploaded files or seeking emotional guidance, it’s designed to assist you with clarity, empathy, and efficiency.
+      </p>
+    </section>
+
+    <section class="grid md:grid-cols-2 gap-10">
+      <!-- Feature 1 -->
+      <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+        <h3 class="text-xl font-semibold text-teal-800 mb-2">🧠 AI-Powered Chat Support</h3>
+        <p class="text-teal-800">Ask any question—mental health, personal development, or file-related. Powered by Groq's LLaMA 3, it provides fast and intelligent answers.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+        <h3 class="text-xl font-semibold text-teal-800 mb-2">📄 Smart Document Analysis</h3>
+        <p class="text-teal-800">Upload PDFs, DOCX, or text files. CentrixSupport extracts meaningful content and answers questions using context-aware RAG techniques.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+        <h3 class="text-xl font-semibold text-teal-800 mb-2">❤️ Emotional Risk Detection</h3>
+        <p class="text-teal-800">Integrated emotion and risk detection ensures users experiencing distress are gently guided with helpline support.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+        <h3 class="text-xl font-semibold text-teal-800 mb-2">🛠️ Self-Care Toolkit</h3>
+        <p class="text-teal-800">Includes guided mental exercises, check-ins, and task management to build resilience and structure.</p>
+      </div>
+    </section>
+
+    <section class="text-center mt-10">
+      <a href="{{ url_for('disclaimer') }}" class="inline-block bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-800 transition">🚀 Get Started</a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-teal-800 text-white text-center py-4 text-sm mt-12">
+    © {{ year | default(2025) }} CentrixSupport. All rights reserved.
+  </footer>
+
+</body>
+</html>
