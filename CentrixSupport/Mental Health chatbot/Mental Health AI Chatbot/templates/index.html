@@ -28,6 +28,24 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
     }
+
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #chatMain.with-sidebar {
+      margin-left: 16rem; /* width of sidebar (64 * 4) */
+    }
   </style>
 </head>
 <body class="bg-teal-100 font-sans min-h-screen overflow-x-hidden relative">
@@ -76,9 +94,9 @@
       <!-- Chat Box -->
       <div id="chatBox" class="bg-white rounded-xl shadow-inner p-4 space-y-4 h-96 overflow-y-auto">
         <div class="text-left">
-          <div class="inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl text-shadow">
+          <div class="inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl text-shadow animate-fade-in">
             <p>Hi there! How can I support you today?</p>
-            <span class="block text-xs text-gray-500">[<span class="timestamp"></span>]</span>
+            <span class="block text-xs text-gray-500 mt-1">[<span class="timestamp"></span>]</span>
           </div>
         </div>
       </div>
@@ -108,8 +126,8 @@
     </div>
   </div>
 
-
   <script>
+    // ===== DOM =====
     const chatBox = document.getElementById("chatBox");
     const chatForm = document.getElementById("chatForm");
     const userInput = document.getElementById("userInput");
@@ -118,19 +136,18 @@
     const uploadStatus = document.getElementById("uploadStatus");
     const fileList = document.getElementById("fileList");
     const historyList = document.getElementById("historyList");
-    const toggleHistoryBtn = document.getElementById("toggleHistory");
-    const historySidebar = document.getElementById("historySidebar");
-    const chatMain = document.getElementById("chatMain");
   
-    let stopTyping = false;
-    let uploadedFiles = [];
-    let uploadedFilePaths = [];
-    let fileUsed = false;
+    // ===== State =====
+    let uploadedFilePaths = []; // support multiple files
+    let fileUsedOnce = false;   // ensures one-time use
+    let pendingSearchAbort = null;
+    let isSearching = false;
   
-    // Session setup
+    // Sessions
     let currentSessionId = localStorage.getItem("currentSessionId") || Date.now().toString();
     let sessions = JSON.parse(localStorage.getItem("chatSessions") || "{}");
   
+    // ===== Utils =====
     function addTimestamp() {
       return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
@@ -148,12 +165,14 @@
       Object.entries(sessions).forEach(([sessionId, session]) => {
         const container = document.createElement("div");
         container.className = "relative group";
+  
         const firstMessage = session.messages.find(m => m.role === "user");
         const label = firstMessage ? `${firstMessage.text.slice(0, 20)}...` : "Untitled";
   
         const div = document.createElement("div");
         div.className = "text-sm bg-teal-700 p-2 rounded hover:bg-teal-600 cursor-pointer pr-8";
-        div.textContent = `${label} [${session.messages[0]?.time || "time"}]`;
+        const startedAt = session.messages[0]?.time || "time";
+        div.textContent = `${label} [${startedAt}]`;
         div.onclick = () => loadSession(sessionId);
   
         const delBtn = document.createElement("button");
@@ -183,10 +202,52 @@
       chatBox.innerHTML = "";
       const session = sessions[sessionId];
       if (session?.messages) {
-        session.messages.forEach(msg => addMessage(msg.text, msg.role === "user"));
+        session.messages.forEach(msg => addMessage(msg.text, msg.role === "user", msg.time));
       }
     }
   
+    function addMessage(text, isUser = false, time = null) {
+      const wrapper = document.createElement("div");
+      wrapper.className = isUser ? "text-right" : "text-left";
+  
+      const bubble = document.createElement("div");
+      bubble.className = `inline-block ${isUser ? "bg-teal-600 text-white" : "bg-teal-200 text-teal-900 animate-fade-in"} px-4 py-2 rounded-xl whitespace-pre-wrap`;
+  
+      const safe = (txt) => String(txt).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      bubble.innerHTML = `${safe(text).replace(/\n/g, "<br>")}<span class='block text-xs text-gray-500 mt-1'>[${time || addTimestamp()}]</span>`;
+  
+      wrapper.appendChild(bubble);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  
+    function addTypingBubble() {
+      const wrapper = document.createElement("div");
+      wrapper.className = "text-left";
+      const bubble = document.createElement("div");
+      bubble.className = "inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl whitespace-pre-wrap animate-fade-in";
+  
+      const loading = document.createElement("div");
+      loading.className = "typing-loader mt-1";
+      loading.innerHTML = "<span></span><span></span><span></span>";
+  
+      bubble.appendChild(loading);
+      wrapper.appendChild(bubble);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+  
+      return { bubble, loading };
+    }
+  
+    function markFilesConsumed() {
+      fileUsedOnce = true;
+      uploadedFilePaths = [];
+      fileInput.value = "";
+      uploadStatus.innerHTML = `<p class='text-sm text-yellow-800'>🔁 Files used. Upload again if needed.</p>`;
+      fileList.innerHTML = "";
+    }
+  
+    // ===== New chat =====
     document.getElementById("newChat").addEventListener("click", () => {
       currentSessionId = Date.now().toString();
       sessions[currentSessionId] = { messages: [] };
@@ -197,110 +258,83 @@
       renderHistory();
     });
   
-    toggleHistoryBtn.addEventListener("click", () => {
-      historySidebar.classList.toggle("hidden");
-      chatMain.classList.toggle("with-sidebar");
-    });
-  
-    window.addEventListener("resize", () => {
-      if (window.innerWidth >= 768 && !historySidebar.classList.contains("hidden")) {
-        chatMain.classList.add("with-sidebar");
-      } else {
-        chatMain.classList.remove("with-sidebar");
-      }
-    });
-  
-    function addMessage(text, isUser = false) {
-      const wrapper = document.createElement("div");
-      wrapper.className = isUser ? "text-right" : "text-left";
-      const bubble = document.createElement("div");
-      bubble.className = `inline-block ${isUser ? "bg-teal-600 text-white" : "bg-teal-200 text-teal-900"} px-4 py-2 rounded-xl whitespace-pre-wrap`;
-      bubble.innerHTML = `${text}<span class='block text-xs text-gray-500 mt-1'>[${addTimestamp()}]</span>`;
-      wrapper.appendChild(bubble);
-      chatBox.appendChild(wrapper);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-  
-    function renderFileList() {
-      fileList.innerHTML = "";
-      uploadedFiles.forEach((file, index) => {
-        const li = document.createElement("li");
-        li.className = "flex justify-between items-center bg-gray-100 p-2 rounded";
-        li.innerHTML = `<span>${file.name}</span>`;
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "❌";
-        removeBtn.onclick = () => {
-          uploadedFiles.splice(index, 1);
-          renderFileList();
-        };
-        li.appendChild(removeBtn);
-        fileList.appendChild(li);
-      });
-    }
-  
-    uploadForm.addEventListener("submit", async (e) => {
+    // ===== Upload handler =====
+    uploadForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (!fileInput.files.length) return alert("Please select files to upload.");
+      const files = fileInput.files;
+      if (!files.length) return alert("Please select or drop a file.");
   
-      uploadedFiles = Array.from(fileInput.files);
-      uploadedFilePaths = [];
-      fileUsed = false;
       uploadStatus.innerHTML = "";
-      renderFileList();
+      fileUsedOnce = false;
+      uploadedFilePaths = [];
   
-      for (const file of uploadedFiles) {
-        const formData = new FormData();
-        formData.append("file", file);
-  
-        const progressBar = document.createElement("div");
-        progressBar.className = "bg-teal-600 h-2.5 rounded-full w-0 mb-1";
-        const container = document.createElement("div");
-        container.className = "w-full bg-gray-200 rounded-full mt-2";
-        container.appendChild(progressBar);
-        uploadStatus.appendChild(container);
-  
-        try {
-          await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/upload", true);
-            xhr.upload.onprogress = function (e) {
-              if (e.lengthComputable) {
-                const percent = Math.round((e.loaded / e.total) * 100);
-                progressBar.style.width = percent + "%";
-              }
-            };
-            xhr.onload = function () {
-              if (xhr.status === 200) {
-                const result = JSON.parse(xhr.responseText);
-                if (result.filepaths?.length) {
-                  uploadedFilePaths.push(...result.filepaths);
-                  resolve();
-                } else {
-                  reject(new Error("No file path returned"));
-                }
-              } else {
-                reject(new Error(`Upload failed (Status ${xhr.status})`));
-              }
-            };
-            xhr.onerror = () => reject(new Error("Upload failed (Network error)"));
-            xhr.send(formData);
-          });
-        } catch (err) {
-          alert(`❌ File upload failed: ${err.message}`);
-          uploadStatus.innerHTML = "";
-          uploadedFilePaths = [];
-          return;
-        }
+      const formData = new FormData();
+      for (const f of files) {
+        formData.append("file", f);
       }
   
-      uploadStatus.innerHTML = `
-        <p class="text-sm text-green-700 mt-2">✅ File uploaded successfully.</p>
-        <p class="text-sm text-gray-700">💬 You may now ask <strong>one</strong> question using this file.</p>
-      `;
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload", true);
+  
+      // Disable chat while uploading
+      chatForm.querySelector("button").disabled = true;
+      userInput.disabled = true;
+  
+      // Progress bar
+      const progressBar = document.createElement("div");
+      progressBar.className = "bg-teal-600 h-2.5 rounded-full w-0 mb-1 transition-all duration-500";
+      const container = document.createElement("div");
+      container.className = "w-full bg-gray-200 rounded-full mt-2";
+      container.appendChild(progressBar);
+      uploadStatus.appendChild(container);
+  
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
+        }
+      };
+  
+      xhr.onload = function () {
+        chatForm.querySelector("button").disabled = false;
+        userInput.disabled = false;
+  
+        if (xhr.status === 200) {
+          let result = {};
+          try { result = JSON.parse(xhr.responseText || "{}"); } catch {}
+          uploadedFilePaths = result.filepaths || [];
+          if (uploadedFilePaths.length) {
+            uploadStatus.innerHTML =
+              `<p class='text-sm text-green-700 mt-2'>✅ Files uploaded successfully.</p>` +
+              `<p class='text-sm text-gray-700'>💬 Your <strong>next question</strong> will use them.</p>`;
+  
+            // Show only filenames (no full path)
+            fileList.innerHTML = uploadedFilePaths.map(p => {
+              const name = p.split(/[\\/]/).pop(); // works on Windows + Linux paths
+              return `<div class="text-sm text-teal-800 mt-1">📎 ${name}</div>`;
+            }).join("");
+          } else {
+            uploadStatus.innerHTML = `<p class='text-sm text-red-700'>❌ Upload succeeded but no file paths returned.</p>`;
+          }
+        } else {
+          uploadStatus.innerHTML = "<p class='text-sm text-red-700'>❌ Upload failed.</p>";
+        }
+      };
+  
+      xhr.onerror = () => {
+        chatForm.querySelector("button").disabled = false;
+        userInput.disabled = false;
+        uploadStatus.innerHTML = "<p class='text-sm text-red-700'>❌ Network error during upload.</p>";
+      };
+  
+      xhr.send(formData);
     });
   
+    // ===== Chat submit =====
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+  
+      if (isSearching) return;
       const query = userInput.value.trim();
       if (!query) return;
   
@@ -308,94 +342,73 @@
       saveMessage(currentSessionId, "user", query);
       userInput.value = "";
   
-      const wrapper = document.createElement("div");
-      wrapper.className = "text-left";
-      const bubble = document.createElement("div");
-      bubble.className = "inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl whitespace-pre-wrap";
+      const { bubble, loading } = addTypingBubble();
   
-      const loading = document.createElement("div");
-      loading.className = "typing-loader mt-1";
-      loading.innerHTML = "<span></span><span></span><span></span>";
-      bubble.appendChild(loading);
+      const shouldAttachFiles = uploadedFilePaths.length && !fileUsedOnce;
+      const payload = {
+        query,
+        filepaths: shouldAttachFiles ? uploadedFilePaths : [],
+        session_name: currentSessionId
+      };
   
-      wrapper.appendChild(bubble);
-      chatBox.appendChild(wrapper);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      try { pendingSearchAbort?.abort(); } catch {}
+      pendingSearchAbort = new AbortController();
+      isSearching = true;
   
       try {
-        const useFile = !fileUsed && uploadedFilePaths.length > 0;
         const res = await fetch("/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query,
-            filepaths: useFile ? uploadedFilePaths : [],
-            session_name: currentSessionId
-          }),
+          body: JSON.stringify(payload),
+          signal: pendingSearchAbort.signal
         });
   
-        if (!res.ok) throw new Error("Failed to get response from server.");
+        if (!res.ok) throw new Error(`Server error (${res.status})`);
   
         const data = await res.json();
-        const cleanResponse = data.response?.trim() || "⚠️ No response received.";
+        const responseText = (data.response || "").trim() || "⚠️ No response.";
   
-        bubble.removeChild(loading);
-        const heading = document.createElement("div");
-        heading.className = "font-bold text-teal-700 mb-1";
-        heading.textContent = "Response:";
-        const responseContent = document.createElement("p");
-        responseContent.className = "whitespace-pre-wrap";
-        bubble.appendChild(heading);
-        bubble.appendChild(responseContent);
+        if (bubble.contains(loading)) bubble.removeChild(loading);
+        const responseEl = document.createElement("p");
+        responseEl.className = "whitespace-pre-wrap animate-fade-in";
+        responseEl.innerHTML = responseText.replace(/\n/g, "<br>");
+        bubble.appendChild(responseEl);
   
-        stopTyping = false;
-        let displayText = "";
-        for (const char of cleanResponse) {
-          if (stopTyping) break;
-          displayText += char;
-          responseContent.innerHTML = displayText.replace(/\n/g, "<br>");
-          chatBox.scrollTop = chatBox.scrollHeight;
-          await new Promise(r => setTimeout(r, 1));
-        }
-  
-        bubble.appendChild(document.createElement("br"));
         const timestamp = document.createElement("span");
         timestamp.className = "block text-xs text-gray-500 mt-1";
         timestamp.textContent = `[${addTimestamp()}]`;
         bubble.appendChild(timestamp);
   
-        saveMessage(currentSessionId, "bot", cleanResponse);
+        saveMessage(currentSessionId, "bot", responseText);
   
-        if (useFile) {
-          uploadedFiles = [];
-          uploadedFilePaths = [];
-          fileInput.value = "";
-          fileList.innerHTML = "";
-          uploadStatus.innerHTML = `<p class='text-sm text-yellow-800'>🔁 File was used. Upload again if needed.</p>`;
-          fileUsed = true;
+        if (shouldAttachFiles) {
+          markFilesConsumed();
         }
-  
       } catch (err) {
         if (bubble.contains(loading)) bubble.removeChild(loading);
-        bubble.textContent = "❌ Failed to get response from server.";
+        bubble.innerHTML = "❌ Failed to get response from server.";
+        console.error("❌ Chat error:", err);
+      } finally {
+        isSearching = false;
       }
     });
   
-    // Redirect to disclaimer on first load
+    // ===== On load =====
     window.addEventListener("DOMContentLoaded", () => {
       const seenDisclaimer = localStorage.getItem("seenDisclaimer");
       if (!seenDisclaimer) {
         localStorage.setItem("seenDisclaimer", "yes");
         window.location.href = "/disclaimer";
-      } else {
-        renderHistory();
-        loadSession(currentSessionId);
+        return;
       }
+      renderHistory();
+      if (!sessions[currentSessionId]) {
+        sessions[currentSessionId] = { messages: [] };
+        localStorage.setItem("chatSessions", JSON.stringify(sessions));
+      }
+      loadSession(currentSessionId);
     });
   </script>
-  
-    
-    
   
   
 </body>
