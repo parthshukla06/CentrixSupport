@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      background: #e6f2ff; /* soft light blue background */
+      background: #e6f2ff;
       margin: 0;
       padding: 0;
       display: flex;
@@ -26,13 +26,17 @@
       text-align: center;
     }
 
+    /* ✅ Logo Styling */
     .logo {
-      width: 110px;
+      width: 80px;         /* adjust size here */
+      height: auto;
       margin-bottom: 22px;
+      border-radius: 50%;  /* makes it round */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
-      color: #004080; /* deep blue */
+      color: #004080;
       margin-bottom: 25px;
     }
 
@@ -46,7 +50,7 @@
     input[type="email"],
     textarea {
       padding: 14px 18px;
-      border: 1.8px solid #99ccff; /* light blue border */
+      border: 1.8px solid #99ccff;
       border-radius: 8px;
       font-size: 1rem;
       transition: border-color 0.3s ease;
@@ -56,7 +60,7 @@
     input[type="text"]:focus,
     input[type="email"]:focus,
     textarea:focus {
-      border-color: #0073e6; /* stronger blue on focus */
+      border-color: #0073e6;
       outline: none;
     }
 
@@ -65,7 +69,7 @@
     }
 
     button {
-      background-color: #0073e6; /* primary blue */
+      background-color: #0073e6;
       color: white;
       padding: 14px 0;
       border: none;
@@ -77,30 +81,24 @@
     }
 
     button:hover {
-      background-color: #005bb5; /* darker blue on hover */
+      background-color: #005bb5;
     }
   </style>
 </head>
 <body>
   <div class="contact-container">
-    <!-- Replace 'logo.png' with your actual logo file path -->
-    <img src="logo.png" alt="Mental Health AI Chatbot Logo" class="logo" />
+    <!-- ✅ Fixed: logo uses custom CSS class -->
+    <img src="{{ url_for('static', filename='img/centic.png') }}" 
+         alt="Centrix Logo" 
+         class="logo">
+
     <h1>Contact Us</h1>
-    <form id="contactForm">
+    <form id="contactForm" method="POST" action="/send_email">
       <input type="text" name="name" placeholder="Your Name" required />
       <input type="email" name="email" placeholder="Your Email" required />
       <textarea name="message" placeholder="Your Message" required></textarea>
-      <button type="submit">Submit</button>
+      <button type="submit">Send</button>
     </form>
   </div>
-
-  <script>
-    const form = document.getElementById('contactForm');
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      alert('Thank you for contacting us! We will get back to you shortly.');
-      form.reset();
-    });
-  </script>
 </body>
 </html>
