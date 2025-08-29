@@ -7,8 +7,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .text-shadow {
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
+
+    /* Typing loader animation */
     .typing-loader {
       width: 30px;
       display: flex;
@@ -23,29 +25,76 @@
     }
     .typing-loader span:nth-child(2) { animation-delay: 0.2s; }
     .typing-loader span:nth-child(3) { animation-delay: 0.4s; }
-
     @keyframes typing {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
     }
 
+    /* Fade in animation for new messages */
     .animate-fade-in {
-      animation: fadeIn 0.3s ease-in-out;
+      animation: fadeIn 0.3s ease-in-out; 
     }
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Sidebar layout */
     #chatMain.with-sidebar {
-      margin-left: 16rem; /* width of sidebar (64 * 4) */
+      margin-left: 16rem;
     }
+
+    /* ====== Message Styles ====== */
+    .bot-message, .user-message {
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin: 8px 0;
+      max-width: 70%;
+      word-wrap: break-word;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .bot-message {
+      background: #a0f5e2;
+      color: #064e3b;
+    }
+
+    .user-message {
+      background: #0f766e;
+      color: white;
+      margin-left: auto;
+    }
+
+    /* ====== Footer (time + icons) ====== */
+    .message-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: gray;
+    }
+
+    .timestamp {
+      font-style: italic;
+    }
+
+    /* Action buttons 📋 🔊 */
+    .icon-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      color: #0f766e;
+      transition: 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: #064e3b;
+      transform: scale(1.1);
+    }
+
   </style>
 </head>
 <body class="bg-teal-100 font-sans min-h-screen overflow-x-hidden relative">
@@ -62,7 +111,7 @@
     <!-- Navbar -->
     <nav class="bg-teal-800 text-white px-4 md:px-8 py-4 flex justify-between items-center fixed w-full z-40 top-0">
       <div class="flex items-center gap-4">
-        <button id="toggleHistory" class="bg-white text-teal-900 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-teal-500" aria-label="Toggle sidebar">☰</button>
+        <button id="toggleHistory" class="bg-white text-teal-900 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-teal-500">☰</button>
         <div class="flex items-center gap-2">
           <img src="{{ url_for('static', filename='img/centic.png') }}" alt="Centrix Logo" class="h-10 w-10 rounded-full shadow-sm" />
           <div class="text-xl font-bold">CentrixSupport</div>
@@ -74,7 +123,6 @@
         <a href="{{ url_for('resource') }}" class="hover:underline">Resources</a>
         <a href="{{ url_for('contact') }}" class="hover:underline">Contact</a>
         <a href="{{ url_for('help') }}" class="hover:underline">Get Help</a>
-        <button onclick="toggleTodoModal()" class="hover:underline">To Do List</button>
       </div>
       <button id="newChat" class="ml-4 bg-white text-teal-900 px-3 py-1 rounded hover:bg-gray-100 text-sm">+ New Chat</button>
     </nav>
@@ -93,18 +141,49 @@
 
       <!-- Chat Box -->
       <div id="chatBox" class="bg-white rounded-xl shadow-inner p-4 space-y-4 h-96 overflow-y-auto">
+        <!-- Bot message example -->
         <div class="text-left">
           <div class="inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl text-shadow animate-fade-in">
             <p>Hi there! How can I support you today?</p>
-            <span class="block text-xs text-gray-500 mt-1">[<span class="timestamp"></span>]</span>
+            <div class="message-footer">
+              <span class="timestamp">09:52 AM</span>
+              <button class="icon-btn" onclick="copyMessage(this)">📋</button>
+              <button class="icon-btn" onclick="speakMessage(this)">🔊</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User message example -->
+        <div class="text-right">
+          <div class="inline-block bg-teal-700 text-white px-4 py-2 rounded-xl animate-fade-in">
+            <p>Hello!</p>
+            <div class="message-footer">
+              <span class="timestamp">09:52 AM</span>
+              <button class="icon-btn" onclick="copyMessage(this)">📋</button>
+              <button class="icon-btn" onclick="speakMessage(this)">🔊</button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Chat Input -->
-      <form id="chatForm" class="mt-6 flex gap-4">
-        <input type="text" id="userInput" class="flex-1 px-4 py-2 border-2 border-teal-500 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400" placeholder="Ask me anything..." autocomplete="off" />
-        <button type="submit" class="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition">Send 🚀</button>
+      <form id="chatForm" class="mt-6 flex gap-4 items-center">
+        <input type="text" id="userInput" 
+          class="flex-1 px-4 py-2 border-2 border-teal-500 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400" 
+          placeholder="Ask me anything..." autocomplete="off" />
+        
+        <!-- Mic / Stop Button -->
+
+        <button type="button" id="micBtn" 
+          class="bg-teal-700 text-white p-2 rounded-md hover:bg-green-400 transition flex items-center justify-center">
+          <img id="micIcon" width="24" height="24" 
+            src="https://img.icons8.com/material-sharp/24/microphone--v1.png" 
+            alt="mic"/>
+        </button>
+        
+        <!-- 🚀 Send Button -->
+        <button type="submit" 
+          class="bg-teal-700 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition">Send 🚀</button>
       </form>
     </main>
   </div>
@@ -125,6 +204,8 @@
       <ul id="taskList" class="list-disc list-inside text-teal-800 space-y-1 max-h-40 overflow-y-auto"></ul>
     </div>
   </div>
+</body>
+
 
   <script>
     // ===== DOM =====
@@ -136,22 +217,88 @@
     const uploadStatus = document.getElementById("uploadStatus");
     const fileList = document.getElementById("fileList");
     const historyList = document.getElementById("historyList");
-  
+    const micBtn = document.getElementById("micBtn"); // 🎤 Mic button
+
     // ===== State =====
-    let uploadedFilePaths = []; // support multiple files
-    let fileUsedOnce = false;   // ensures one-time use
+    let uploadedFilePaths = [];
+    let fileUsedOnce = false;
     let pendingSearchAbort = null;
     let isSearching = false;
-  
-    // Sessions
     let currentSessionId = localStorage.getItem("currentSessionId") || Date.now().toString();
     let sessions = JSON.parse(localStorage.getItem("chatSessions") || "{}");
-  
+
+    // ===== Audio =====
+    const sendSound = new Audio("/static/sounds/send.mp3");
+    const receiveSound = new Audio("/static/sounds/receive.mp3");
+
+    // ===== Speech Synthesis =====
+    let currentUtterance = null;
+    let isSpeaking = false;
+    let femaleVoice = null;
+    let currentSpeakBtn = null;
+
+    function waitForVoices(timeoutMs = 2000) {
+      return new Promise((resolve) => {
+        const start = performance.now();
+        const check = () => {
+          const voices = window.speechSynthesis.getVoices();
+          if (voices && voices.length) return resolve(voices);
+          if (performance.now() - start > timeoutMs) return resolve(voices || []);
+          setTimeout(check, 50);
+        };
+        check();
+      });
+    }
+    function pickFemaleVoice(voices) {
+      const byName = (s) => s ? s.toLowerCase() : "";
+      const candidates = voices.filter(v =>
+        byName(v.name).includes("female") ||
+        byName(v.name).includes("woman") ||
+        (v.lang && v.lang.toLowerCase().startsWith("en") && byName(v.name).includes("google"))
+      );
+      if (candidates.length) return candidates[0];
+      const en = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+      return en || voices[0] || null;
+    }
+    async function initVoices() {
+      const voices = await waitForVoices();
+      femaleVoice = pickFemaleVoice(voices);
+    }
+    window.speechSynthesis.onvoiceschanged = () => initVoices();
+    initVoices();
+
+    function resetSpeakUI() {
+      isSpeaking = false;
+      if (currentSpeakBtn) currentSpeakBtn.innerHTML = "🔊";
+      currentSpeakBtn = null;
+      currentUtterance = null;
+    }
+    function stopAllSpeech() {
+      try { window.speechSynthesis.cancel(); } catch {}
+      resetSpeakUI();
+    }
+    function toggleSpeech(text, btn) {
+      if (isSpeaking) { stopAllSpeech(); return; }
+      stopAllSpeech();
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.voice = femaleVoice || null;
+      currentUtterance.pitch = 1.1;
+      currentUtterance.rate = 1;
+      currentUtterance.onend = resetSpeakUI;
+      currentUtterance.onerror = resetSpeakUI;
+      try {
+        window.speechSynthesis.speak(currentUtterance);
+        isSpeaking = true;
+        currentSpeakBtn = btn || null;
+        if (currentSpeakBtn) currentSpeakBtn.innerHTML = "⏹️";
+      } catch { resetSpeakUI(); }
+    }
+    window.addEventListener("beforeunload", stopAllSpeech);
+
     // ===== Utils =====
     function addTimestamp() {
       return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
-  
     function saveMessage(sessionId, role, text) {
       if (!sessions[sessionId]) sessions[sessionId] = { messages: [] };
       sessions[sessionId].messages.push({ role, text, time: addTimestamp() });
@@ -159,24 +306,20 @@
       localStorage.setItem("currentSessionId", sessionId);
       renderHistory();
     }
-  
     function renderHistory() {
       historyList.innerHTML = "";
       Object.entries(sessions).forEach(([sessionId, session]) => {
         const container = document.createElement("div");
         container.className = "relative group";
-  
         const firstMessage = session.messages.find(m => m.role === "user");
         const label = firstMessage ? `${firstMessage.text.slice(0, 20)}...` : "Untitled";
-  
         const div = document.createElement("div");
         div.className = "text-sm bg-teal-700 p-2 rounded hover:bg-teal-600 cursor-pointer pr-8";
         const startedAt = session.messages[0]?.time || "time";
         div.textContent = `${label} [${startedAt}]`;
         div.onclick = () => loadSession(sessionId);
-  
         const delBtn = document.createElement("button");
-        delBtn.innerHTML = `<img src="https://img.icons8.com/pulsar-gradient/48/clear-symbol.png" alt="delete" width="20" height="20">`;
+        delBtn.innerHTML = `<img src="https://img.icons8.com/pulsar-gradient/48/clear-symbol.png" width="20">`;
         delBtn.className = "absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100";
         delBtn.onclick = (e) => {
           e.stopPropagation();
@@ -189,13 +332,11 @@
           }
           renderHistory();
         };
-  
         container.appendChild(div);
         container.appendChild(delBtn);
         historyList.appendChild(container);
       });
     }
-  
     function loadSession(sessionId) {
       currentSessionId = sessionId;
       localStorage.setItem("currentSessionId", sessionId);
@@ -205,40 +346,52 @@
         session.messages.forEach(msg => addMessage(msg.text, msg.role === "user", msg.time));
       }
     }
-  
     function addMessage(text, isUser = false, time = null) {
       const wrapper = document.createElement("div");
       wrapper.className = isUser ? "text-right" : "text-left";
-  
       const bubble = document.createElement("div");
-      bubble.className = `inline-block ${isUser ? "bg-teal-600 text-white" : "bg-teal-200 text-teal-900 animate-fade-in"} px-4 py-2 rounded-xl whitespace-pre-wrap`;
-  
+      bubble.className = `inline-block relative group ${isUser ? "bg-teal-600 text-white" : "bg-teal-200 text-teal-900 animate-fade-in"} px-4 py-2 rounded-xl whitespace-pre-wrap`;
       const safe = (txt) => String(txt).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-      bubble.innerHTML = `${safe(text).replace(/\n/g, "<br>")}<span class='block text-xs text-gray-500 mt-1'>[${time || addTimestamp()}]</span>`;
-  
+      bubble.innerHTML = `${safe(text).replace(/\n/g, "<br>")}`;
+      const actionRow = document.createElement("div");
+      actionRow.className = "flex items-center gap-2 mt-1 text-xs text-gray-500";
+      const timestamp = document.createElement("span");
+      timestamp.textContent = `[${time || addTimestamp()}]`;
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "hover:text-teal-700";
+      copyBtn.innerHTML = "📋";
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(text).then(() => {
+          copyBtn.innerHTML = "✅"; setTimeout(() => (copyBtn.innerHTML = "📋"), 1000);
+        });
+      };
+      const speakBtn = document.createElement("button");
+      speakBtn.className = "hover:text-teal-700";
+      speakBtn.innerHTML = "🔊";
+      speakBtn.onclick = () => toggleSpeech(text, speakBtn);
+      actionRow.appendChild(timestamp);
+      actionRow.appendChild(copyBtn);
+      actionRow.appendChild(speakBtn);
+      bubble.appendChild(actionRow);
       wrapper.appendChild(bubble);
       chatBox.appendChild(wrapper);
       chatBox.scrollTop = chatBox.scrollHeight;
+      if (isUser) sendSound.play().catch(()=>{}); else receiveSound.play().catch(()=>{});
     }
-  
     function addTypingBubble() {
       const wrapper = document.createElement("div");
       wrapper.className = "text-left";
       const bubble = document.createElement("div");
       bubble.className = "inline-block bg-teal-200 text-teal-900 px-4 py-2 rounded-xl whitespace-pre-wrap animate-fade-in";
-  
       const loading = document.createElement("div");
       loading.className = "typing-loader mt-1";
       loading.innerHTML = "<span></span><span></span><span></span>";
-  
       bubble.appendChild(loading);
       wrapper.appendChild(bubble);
       chatBox.appendChild(wrapper);
       chatBox.scrollTop = chatBox.scrollHeight;
-  
       return { bubble, loading };
     }
-  
     function markFilesConsumed() {
       fileUsedOnce = true;
       uploadedFilePaths = [];
@@ -246,7 +399,7 @@
       uploadStatus.innerHTML = `<p class='text-sm text-yellow-800'>🔁 Files used. Upload again if needed.</p>`;
       fileList.innerHTML = "";
     }
-  
+
     // ===== New chat =====
     document.getElementById("newChat").addEventListener("click", () => {
       currentSessionId = Date.now().toString();
@@ -257,104 +410,74 @@
       addMessage("Hi there! How can I support you today?");
       renderHistory();
     });
-  
+
     // ===== Upload handler =====
     uploadForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const files = fileInput.files;
       if (!files.length) return alert("Please select or drop a file.");
-  
       uploadStatus.innerHTML = "";
       fileUsedOnce = false;
       uploadedFilePaths = [];
-  
       const formData = new FormData();
-      for (const f of files) {
-        formData.append("file", f);
-      }
-  
+      for (const f of files) formData.append("file", f);
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/upload", true);
-  
-      // Disable chat while uploading
       chatForm.querySelector("button").disabled = true;
       userInput.disabled = true;
-  
-      // Progress bar
       const progressBar = document.createElement("div");
       progressBar.className = "bg-teal-600 h-2.5 rounded-full w-0 mb-1 transition-all duration-500";
       const container = document.createElement("div");
       container.className = "w-full bg-gray-200 rounded-full mt-2";
       container.appendChild(progressBar);
       uploadStatus.appendChild(container);
-  
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
           const percent = Math.round((e.loaded / e.total) * 100);
           progressBar.style.width = percent + "%";
         }
       };
-  
       xhr.onload = function () {
         chatForm.querySelector("button").disabled = false;
         userInput.disabled = false;
-  
         if (xhr.status === 200) {
           let result = {};
           try { result = JSON.parse(xhr.responseText || "{}"); } catch {}
           uploadedFilePaths = result.filepaths || [];
           if (uploadedFilePaths.length) {
-            uploadStatus.innerHTML =
-              `<p class='text-sm text-green-700 mt-2'>✅ Files uploaded successfully.</p>` +
-              `<p class='text-sm text-gray-700'>💬 Your <strong>next question</strong> will use them.</p>`;
-  
-            // Show only filenames (no full path)
+            uploadStatus.innerHTML = `<p class='text-sm text-green-700 mt-2'>✅ Files uploaded successfully.</p><p class='text-sm text-gray-700'>💬 Your <strong>next question</strong> will use them.</p>`;
             fileList.innerHTML = uploadedFilePaths.map(p => {
-              const name = p.split(/[\\/]/).pop(); // works on Windows + Linux paths
+              const name = p.split(/[\\/]/).pop();
               return `<div class="text-sm text-teal-800 mt-1">📎 ${name}</div>`;
             }).join("");
           } else {
             uploadStatus.innerHTML = `<p class='text-sm text-red-700'>❌ Upload succeeded but no file paths returned.</p>`;
           }
-        } else {
-          uploadStatus.innerHTML = "<p class='text-sm text-red-700'>❌ Upload failed.</p>";
-        }
+        } else uploadStatus.innerHTML = "<p class='text-sm text-red-700'>❌ Upload failed.</p>";
       };
-  
       xhr.onerror = () => {
         chatForm.querySelector("button").disabled = false;
         userInput.disabled = false;
         uploadStatus.innerHTML = "<p class='text-sm text-red-700'>❌ Network error during upload.</p>";
       };
-  
       xhr.send(formData);
     });
-  
-    // ===== Chat submit =====
+
+    // ===== Chat submit (RAG flow intact) =====
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-  
       if (isSearching) return;
       const query = userInput.value.trim();
       if (!query) return;
-  
       addMessage(query, true);
       saveMessage(currentSessionId, "user", query);
       userInput.value = "";
-  
       const { bubble, loading } = addTypingBubble();
-  
       const shouldAttachFiles = uploadedFilePaths.length && !fileUsedOnce;
-      const payload = {
-        query,
-        filepaths: shouldAttachFiles ? uploadedFilePaths : [],
-        session_name: currentSessionId
-      };
-  
+      const payload = { query, filepaths: shouldAttachFiles ? uploadedFilePaths : [], session_name: currentSessionId };
       try { pendingSearchAbort?.abort(); } catch {}
       pendingSearchAbort = new AbortController();
       isSearching = true;
-  
       try {
         const res = await fetch("/search", {
           method: "POST",
@@ -362,44 +485,48 @@
           body: JSON.stringify(payload),
           signal: pendingSearchAbort.signal
         });
-  
         if (!res.ok) throw new Error(`Server error (${res.status})`);
-  
         const data = await res.json();
         const responseText = (data.response || "").trim() || "⚠️ No response.";
-  
         if (bubble.contains(loading)) bubble.removeChild(loading);
         const responseEl = document.createElement("p");
         responseEl.className = "whitespace-pre-wrap animate-fade-in";
         responseEl.innerHTML = responseText.replace(/\n/g, "<br>");
         bubble.appendChild(responseEl);
-  
+        // action row
+        const actionRow = document.createElement("div");
+        actionRow.className = "flex items-center gap-2 mt-1 text-xs text-gray-500";
         const timestamp = document.createElement("span");
-        timestamp.className = "block text-xs text-gray-500 mt-1";
         timestamp.textContent = `[${addTimestamp()}]`;
-        bubble.appendChild(timestamp);
-  
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "hover:text-teal-700";
+        copyBtn.innerHTML = "📋";
+        copyBtn.onclick = () => navigator.clipboard.writeText(responseText);
+        const speakBtn = document.createElement("button");
+        speakBtn.className = "hover:text-teal-700";
+        speakBtn.innerHTML = "🔊";
+        speakBtn.onclick = () => toggleSpeech(responseText, speakBtn);
+        actionRow.appendChild(timestamp);
+        actionRow.appendChild(copyBtn);
+        actionRow.appendChild(speakBtn);
+        bubble.appendChild(actionRow);
         saveMessage(currentSessionId, "bot", responseText);
-  
-        if (shouldAttachFiles) {
-          markFilesConsumed();
-        }
+        if (shouldAttachFiles) markFilesConsumed();
       } catch (err) {
         if (bubble.contains(loading)) bubble.removeChild(loading);
-        bubble.innerHTML = "❌ Failed to get response from server.";
+        bubble.innerHTML = `❌ Failed to get response from server.<br><small>${err.message}</small>`;
         console.error("❌ Chat error:", err);
       } finally {
         isSearching = false;
       }
     });
-  
+
     // ===== On load =====
     window.addEventListener("DOMContentLoaded", () => {
       const seenDisclaimer = localStorage.getItem("seenDisclaimer");
       if (!seenDisclaimer) {
         localStorage.setItem("seenDisclaimer", "yes");
-        window.location.href = "/disclaimer";
-        return;
+        window.location.href = "/disclaimer"; return;
       }
       renderHistory();
       if (!sessions[currentSessionId]) {
@@ -408,8 +535,70 @@
       }
       loadSession(currentSessionId);
     });
+
+    // ===== Sidebar toggle =====
+    const historySidebar = document.getElementById("historySidebar");
+    const toggleHistory = document.getElementById("toggleHistory");
+
+    toggleHistory.addEventListener("click", () => {
+      if (historySidebar.classList.contains("hidden")) {
+        historySidebar.classList.remove("hidden");
+        document.getElementById("chatMain").classList.add("with-sidebar");
+      } else {
+        historySidebar.classList.add("hidden");
+        document.getElementById("chatMain").classList.remove("with-sidebar");
+      }
+    });
+
+        // ===== Speech Recognition (Voice to Text) =====
+        let recognition;
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.lang = "en-US";   
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      const micBtn = document.getElementById("micBtn");
+      const micIcon = document.getElementById("micIcon");
+      let isListening = false;
+
+      micBtn.addEventListener("click", () => {
+        if (!isListening) {
+          recognition.start();
+          micIcon.src = "https://img.icons8.com/fluency/24/stop-squared.png"; // stop icon (24x24)
+          micIcon.width = 24;
+          micIcon.height = 24;
+          isListening = true;
+        } else {
+          recognition.stop();
+          micIcon.src = "https://img.icons8.com/material-sharp/24/microphone--v1.png"; // mic icon
+          micIcon.width = 24;
+          micIcon.height = 24;
+          isListening = false;
+        }
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("userInput").value = transcript;
+      };
+
+      recognition.onend = () => {
+        micIcon.src = "https://img.icons8.com/material-sharp/24/microphone--v1.png"; // reset to mic
+        micIcon.width = 24;
+        micIcon.height = 24;
+        isListening = false;
+      };
+
+    } else {
+      console.warn("Speech Recognition not supported in this browser.");
+      document.getElementById("micBtn").style.display = "none";
+    }
+
+
   </script>
-  
-  
+
+
 </body>
 </html>
