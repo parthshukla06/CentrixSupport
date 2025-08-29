@@ -108,13 +108,13 @@
       </li>
     </ul>
 
-    <button id="backBtn">Back to Contact</button>
+    <button id="backBtn">Back to Chat</button>
   </div>
 
   <script>
     document.getElementById('backBtn').addEventListener('click', () => {
       // Change the URL below to the actual path of your contact page
-      window.location.href = 'index.html';
+      <a href="{{ url_for('index') }}" class="hover:underline">Chat</a>
     });
   </script>
 </body>
