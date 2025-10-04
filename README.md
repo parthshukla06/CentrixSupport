@@ -75,22 +75,46 @@ cd mindwell-chatbot
 pip install -r requirements.txt
 ```
 
-### 3. Create `.env` File
+
+### 3. Create an `.env` file (use the example)
+
+There is an example env file included with the chatbot code. Copy it and fill in your keys instead of committing secrets directly to the repo.
+
+From the repository root (PowerShell):
+
+```powershell
+cd "CentrixSupport\Mental Health chatbot\Mental Health AI Chatbot"
+Copy-Item .env.example .env
+# then open .env and replace placeholders with your real values (keep this file private)
+```
+
+Example entries (already present in `.env.example`):
 
 ```env
-license=your_groq_api_key_here
-recommend_resources_URl=https://www.headspace.com/meditation/anxiety
-resources_URl=https://www.sleepfoundation.org/sleep-hygiene
-FLASK_ENV=production
+license=YOUR_GROQ_API_KEY_HERE
+recommend_resources_URL=https://www.headspace.com/meditation/anxiety
+resources_URL=https://www.sleepfoundation.org/sleep-hygiene
+FLASK_ENV=development
 ```
 
-### 4. Run Locally
+### 4. Local development (Windows PowerShell)
 
-```bash
-python app.py
+Create and activate a virtual environment, install requirements, and run the server.
+
+```powershell
+# from repository root or from the chatbot folder
+cd "CentrixSupport\Mental Health chatbot\Mental Health AI Chatbot"
+python -m venv .venv
+# PowerShell (may require running as admin to change execution policy once):
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+# start the server (use server.py or main.py as appropriate)
+python server.py
 ```
 
-Visit [http://localhost:5000](http://localhost:5000)
+Visit http://localhost:5000 in your browser.
+
+Tip: When you're done, run `deactivate` to leave the virtual environment.
 
 ---
 
