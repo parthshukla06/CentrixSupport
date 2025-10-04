@@ -1,0 +1,6 @@
+CentrixSupport/Mental Health chatbot/Mental Health AI Chatbot/.env
+__pycache__/
+*.pyc
+
+
+.venv/
