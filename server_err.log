@@ -1,0 +1,47 @@
+D:\Centrix-Support-Mental-health-AI-chatbot\CentrixSupport\Mental Health chatbot\Mental Health AI Chatbot\app\content_retrieval.py:20: LangChainDeprecationWarning: Importing Chroma from langchain.vectorstores is deprecated. Please replace deprecated imports:
+
+>> from langchain.vectorstores import Chroma
+
+with new imports of:
+
+>> from langchain_community.vectorstores import Chroma
+You can use the langchain cli to **automatically** upgrade many imports. Please see documentation here <https://python.langchain.com/docs/versions/v0_2/>
+  from langchain.vectorstores import Chroma
+[nltk_data] Downloading package punkt to
+[nltk_data]     C:\Users\Asus\AppData\Roaming\nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+2025-10-04 16:01:53,874 - INFO - \u2705 Flask starting at http://localhost:5000 (debug reloader disabled)
+2025-10-04 16:01:53,875 - INFO - \U0001f510 API Key Loaded: Yes
+2025-10-04 16:01:53,890 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.101.10:5000
+2025-10-04 16:01:53,891 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-04 16:02:31,585 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:31] "GET / HTTP/1.1" 200 -
+2025-10-04 16:02:31,904 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:31] "[36mGET /static/img/centic.png HTTP/1.1[0m" 304 -
+2025-10-04 16:02:33,272 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:33] "GET /disclaimer HTTP/1.1" 200 -
+2025-10-04 16:02:33,371 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:33] "[36mGET /static/img/centic.png HTTP/1.1[0m" 304 -
+2025-10-04 16:02:35,502 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:35] "GET /chat HTTP/1.1" 200 -
+2025-10-04 16:02:35,614 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:35] "[36mGET /static/img/centic.png HTTP/1.1[0m" 304 -
+2025-10-04 16:02:35,913 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:35] "[33mGET /static/sounds/send.mp3 HTTP/1.1[0m" 404 -
+2025-10-04 16:02:35,915 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:35] "[33mGET /static/sounds/receive.mp3 HTTP/1.1[0m" 404 -
+2025-10-04 16:02:41,807 - INFO - Received query: hii
+2025-10-04 16:02:41,808 - INFO - Sending request to Groq LLM with model=llama-3.1-8b-instant...
+2025-10-04 16:02:42,454 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-04 16:02:42,490 - INFO - Groq response received using model=llama-3.1-8b-instant
+2025-10-04 16:02:42,493 - INFO - 127.0.0.1 - - [04/Oct/2025 16:02:42] "POST /search HTTP/1.1" 200 -
+2025-10-04 16:09:03,266 - INFO - Received query: How can I manage stress?
+2025-10-04 16:09:03,267 - INFO - Sending request to Groq LLM with model=llama-3.1-8b-instant...
+2025-10-04 16:09:04,013 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-04 16:09:04,016 - INFO - Groq response received using model=llama-3.1-8b-instant
+2025-10-04 16:09:04,019 - INFO - 127.0.0.1 - - [04/Oct/2025 16:09:04] "POST /search HTTP/1.1" 200 -
+2025-10-04 16:11:32,511 - INFO - Received query: How can I manage stress?
+2025-10-04 16:11:32,552 - INFO - Sending request to Groq LLM with model=llama-3.1-8b-instant...
+2025-10-04 16:11:33,147 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-04 16:11:33,161 - INFO - Groq response received using model=llama-3.1-8b-instant
+2025-10-04 16:11:33,164 - INFO - 127.0.0.1 - - [04/Oct/2025 16:11:33] "POST /search HTTP/1.1" 200 -
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FFF3ABAC1BD  Unknown               Unknown  Unknown
+KERNEL32.DLL       00007FFF3B03E8D7  Unknown               Unknown  Unknown
+ntdll.dll          00007FFF3D2CC53C  Unknown               Unknown  Unknown

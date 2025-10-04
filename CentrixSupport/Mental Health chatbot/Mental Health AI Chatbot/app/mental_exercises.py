@@ -1,5 +1,5 @@
 import time
-from playsound import playsound
+
 
 def countdown(seconds):
     while seconds > 0:
@@ -95,6 +95,12 @@ def temperature_shift():
 def play_audio():
     print("\n🎶 Playing soothing audio...")
     try:
+        # Import playsound lazily because it may not be installable on all platforms
+        try:
+            from playsound import playsound
+        except Exception:
+            print("⚠️ playsound not available on this environment. Skipping audio playback.")
+            return
         playsound("calm.wav")  # Make sure calm.wav is in the same folder as this script
     except Exception as e:
         print("⚠️ Unable to play audio:", e)

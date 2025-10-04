@@ -1,4 +1,4 @@
-from groq import Groq
+from groq import Groq, BadRequestError
 import os
 import time
 from dotenv import load_dotenv
@@ -13,6 +13,7 @@ import app.self_care_plan
 # ========== Load Environment ==========
 load_dotenv()
 api_key = os.getenv('license')
+MODEL_NAME = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
 if not api_key:
     raise EnvironmentError("❌ 'license' key (Groq API Key) not found in .env")
 
@@ -114,16 +115,20 @@ def generate_summary_conclusion_recommendations(conversation):
     for msg in conversation:
         base_prompt += f"{msg['role'].capitalize()}: {msg['content']}\n"
 
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": "You are a helpful, compassionate mental health assistant."},
-            {"role": "user", "content": base_prompt}
-        ],
-        model="llama3-8b-8192",
-        stream=False,
-        temperature=0.7,
-        max_tokens=500
-    )
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful, compassionate mental health assistant."},
+                {"role": "user", "content": base_prompt}
+            ],
+            model=MODEL_NAME,
+            stream=False,
+            temperature=0.7,
+            max_tokens=500
+        )
+    except BadRequestError as e:
+        # Propagate a clear error message up to the caller (or print)
+        raise RuntimeError(f"Groq API BadRequestError: {e}") from e
     return response.choices[0].message.content.strip()
 
 def respond_to_user(message, rag_context=None):
@@ -134,13 +139,17 @@ def respond_to_user(message, rag_context=None):
             print("📄 Using uploaded file for context-enhanced response.")
         messages.append({"role": "user", "content": message})
 
-        chat_completion = client.chat.completions.create(
-            messages=messages,
-            model="llama3-8b-8192",
-            stream=True,
-            temperature=0.7,
-            max_tokens=1000
-        )
+        try:
+            chat_completion = client.chat.completions.create(
+                messages=messages,
+                model=MODEL_NAME,
+                stream=True,
+                temperature=0.7,
+                max_tokens=1000
+            )
+        except BadRequestError as e:
+            print(f"\u274c Groq API BadRequestError: {e}")
+            return
 
         response_tokens = ""
         for chunk in chat_completion:

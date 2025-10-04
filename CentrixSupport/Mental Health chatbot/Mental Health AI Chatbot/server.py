@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
-from groq import Groq
+from groq import Groq, BadRequestError
 import os
 import sys
 import time
@@ -63,8 +63,8 @@ if not api_key:
     logging.error("❌ API key not found in .env (license)")
     raise EnvironmentError("API key not found. Please set 'license' in .env.")
 
+MODEL_NAME = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
 client = Groq(api_key=api_key)
-
 
 # ===== Helpers =====
 def allowed_file(filename):
@@ -305,17 +305,58 @@ def search():
         trimmed_messages = trim_history(messages)
 
         # Call Groq LLM
-        try:
-            logging.info("Sending request to Groq LLM...")
-            completion = client.chat.completions.create(
-                model="llama3-8b-8192",
-                messages=trimmed_messages,
-                stream=False
-            )
-            assistant_reply = completion.choices[0].message.content.strip()
-        except Exception as e:
-            logging.error(f"LLM request failed: {traceback.format_exc()}")
-            return jsonify({"success": False, "response": f"❌ LLM request failed: {str(e)}"}), 500
+        # Try the configured model first, then fall back to any configured fallback models
+        tried_models = []
+        last_error_msg = None
+        fallback_env = os.getenv('GROQ_FALLBACK_MODELS', 'llama-3.1-8b-instant,llama3-8b-8192')
+        fallback_models = [m.strip() for m in fallback_env.split(',') if m.strip()]
+        candidate_models = [MODEL_NAME] + [m for m in fallback_models if m != MODEL_NAME]
+
+        for model_candidate in candidate_models:
+            try:
+                logging.info(f"Sending request to Groq LLM with model={model_candidate}...")
+                completion = client.chat.completions.create(
+                    model=model_candidate,
+                    messages=trimmed_messages,
+                    stream=False
+                )
+                assistant_reply = completion.choices[0].message.content.strip()
+                logging.info(f"Groq response received using model={model_candidate}")
+                break
+            except BadRequestError as be:
+                # Specific model-related rejection; record and try next candidate
+                logging.warning(f"Groq BadRequest for model {model_candidate}: {be}")
+                msg = str(be)
+                try:
+                    resp = getattr(be, 'response', None)
+                    if isinstance(resp, dict):
+                        msg = resp.get('error', {}).get('message', msg)
+                except Exception:
+                    pass
+                last_error_msg = msg
+                tried_models.append((model_candidate, msg))
+                # If the message doesn't indicate a model issue, stop retrying
+                if 'model_not_found' not in msg and 'model' not in msg.lower():
+                    break
+            except Exception as e:
+                logging.error(f"LLM request failed for model {model_candidate}: {traceback.format_exc()}")
+                msg = str(e)
+                try:
+                    resp = getattr(e, 'response', None)
+                    if isinstance(resp, dict):
+                        msg = resp.get('error', {}).get('message', msg)
+                except Exception:
+                    pass
+                last_error_msg = msg
+                tried_models.append((model_candidate, msg))
+                # For generic errors, don't try many fallbacks — stop after first failure
+                break
+
+        if 'assistant_reply' not in locals():
+            # All attempts failed — return the most helpful message we collected
+            logging.error(f"All Groq model attempts failed: {tried_models}")
+            msg = last_error_msg or 'Unknown Groq error'
+            return jsonify({"success": False, "response": f"Groq error: {msg}", "tried_models": tried_models}), 500
 
         # Persist conversation
         conversation_history.append({"role": "user", "content": question})
@@ -404,6 +445,10 @@ def uploaded_file(filename):
 
 # ==== Run ====
 if __name__ == '__main__':
-    logging.info("✅ Flask running at http://localhost:5000")
+    logging.info("✅ Flask starting at http://localhost:5000 (debug reloader disabled)")
     logging.info(f"🔐 API Key Loaded: {'Yes' if api_key else 'No'}")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    try:
+        # Turn off the reloader to avoid child-process crashes caused by native libs
+        app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+    except Exception:
+        logging.error("Flask failed to start:\n" + traceback.format_exc())

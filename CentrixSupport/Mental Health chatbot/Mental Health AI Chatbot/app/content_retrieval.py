@@ -13,13 +13,11 @@ import whisper
 import pdfplumber
 import pytesseract
 import cv2
-
-from pydub import AudioSegment
 from nltk.tokenize import sent_tokenize
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
+from langchain.vectorstores import Chroma
 from langchain_ollama import OllamaLLM
 
 nltk.download("punkt")
@@ -86,6 +84,7 @@ def extract_text_from_json(path):
 
 def extract_text_from_audio(path):
     try:
+        # Use Whisper directly for transcription (no pydub required).
         model = whisper.load_model("base")
         return model.transcribe(path)["text"]
     except Exception as e:
