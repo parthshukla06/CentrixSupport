@@ -40,7 +40,7 @@
 | ---------- | -------------------------------------- |
 | Backend    | Flask, Python                          |
 | LLM        | [Groq](https://groq.com/) - LLaMA 3    |
-| Frontend   | HTML, Tailwind CSS, JavaScript         |
+| Frontend   | HTML, CSS, JavaScript         |
 | Embeddings | Custom text chunking + semantic search |
 | Deployment | Render / Railway / VPS ready           |
 
