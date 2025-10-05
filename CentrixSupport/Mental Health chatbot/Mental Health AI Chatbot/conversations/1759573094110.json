@@ -10,5 +10,13 @@
   {
     "role": "assistant",
     "content": "I'm so glad you're reaching out! It's completely okay to start with a simple hello. How's your day been so far, and what's been on your mind lately? \n\nYou might find this helpful: Writing down a few things you're grateful for each day can help shift your focus to the present moment and cultivate a more positive mindset."
+  },
+  {
+    "role": "user",
+    "content": "HII"
+  },
+  {
+    "role": "assistant",
+    "content": "That’s an interesting question! My focus here is on mental and emotional well-being, so I may not be the best fit to guide you on that. But if there’s anything on your mind or heart you’d like to talk about, I’m here for you."
   }
 ]
