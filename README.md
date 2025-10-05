@@ -52,7 +52,7 @@
 ├── app.py                # Flask entry point
 ├── main.py               # Core logic (emotion, RAG, summaries)
 ├── templates/            # HTML templates
-├── static/               # JS, CSS, assets
+├── static/               # JS, Tailwind CSS, assets
 ├── uploads/              # Uploaded user files
 ├── conversations/        # Session-based chat logs
 ├── .env                  # API keys (excluded from Git)
