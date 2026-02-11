@@ -1,6 +1,6 @@
-#  Centrix Support: AI Mental Health Support Chatbot
+#  ManoVaidya: AI Mental Health Support Chatbot
 
- Centrix Support is an AI-powered mental health support chatbot built using **Flask** and **Groq's LLaMA 3** model. Designed for empathy, safety, and accessibility, it helps users with:
+ ManoVaidya is an AI-powered mental health support chatbot built using **Flask** and **Groq's LLaMA 3** model. Designed for empathy, safety, and accessibility, it helps users with:
 
 *  Emotional support & conversation
 *  Context-aware answers via uploaded documents (RAG)
